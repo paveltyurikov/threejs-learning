@@ -8,8 +8,17 @@
     "test": "node scripts/test.js"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@mui/material": "^5.11.9",
+    "@react-three/cannon": "^6.5.2",
+    "@react-three/drei": "^9.56.24",
+    "@react-three/fiber": "^8.11.1",
+    "formik": "^2.2.9",
+    "formik-mui": "^5.0.0-alpha.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "three": "^0.149.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
@@ -22,6 +31,7 @@
     "@types/node": "^16.18.12",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
+    "@types/three": "^0.149.0",
     "babel-jest": "^27.4.2",
     "babel-loader": "^8.2.3",
     "babel-plugin-named-asset-import": "^0.3.8",
@@ -71,12 +81,6 @@
     "webpack-dev-server": "^4.6.0",
     "webpack-manifest-plugin": "^4.0.2",
     "workbox-webpack-plugin": "^6.4.1"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [
