@@ -25,138 +25,115 @@ export const BODY = {
 } as const;
 
 export enum Controls {
-  ArrowUp = "ArrowUp",
-  ArrowDown = "ArrowDown",
-  ArrowLeft = "ArrowLeft",
-  ArrowRight = "ArrowRight",
-  KeyA = "KeyA",
-  KeyS = "KeyS",
-  KeyD = "KeyD",
-  KeyW = "KeyW",
+  StrafeForward = "StrafeForward",
+  StrafeBackward = "StrafeBackward",
+  StrafeLeft = "StrafeLeft",
+  StrafeRight = "StrafeRight",
+  TurnLeft = "TurnLeft",
+  ThrottleDown = "ThrottleDown",
+  TurnRight = "TurnRight",
+  ThrottleUp = "ThrottleUp",
 }
 
 export const useKeysMap = () =>
   useMemo<KeyboardControlsEntry<Controls>[]>(
     () => [
-      { name: Controls.ArrowUp, keys: ["ArrowUp"] },
-      { name: Controls.ArrowDown, keys: ["ArrowDown"] },
-      { name: Controls.ArrowLeft, keys: ["ArrowLeft"] },
-      { name: Controls.ArrowRight, keys: ["ArrowRight"] },
-      { name: Controls.KeyA, keys: ["KeyA"] },
-      { name: Controls.KeyS, keys: ["KeyS"] },
-      { name: Controls.KeyD, keys: ["KeyD"] },
-      { name: Controls.KeyW, keys: ["KeyW"] },
+      { name: Controls.StrafeForward, keys: ["ArrowUp"] },
+      { name: Controls.StrafeBackward, keys: ["ArrowDown"] },
+      { name: Controls.StrafeLeft, keys: ["ArrowLeft"] },
+      { name: Controls.StrafeRight, keys: ["ArrowRight"] },
+      { name: Controls.ThrottleUp, keys: ["KeyW"] },
+      { name: Controls.ThrottleDown, keys: ["KeyS"] },
+      { name: Controls.TurnLeft, keys: ["KeyA"] },
+      { name: Controls.TurnRight, keys: ["KeyD"] },
     ],
     []
   );
 
-export const getPitchingValue = (keyMap: any) => {
-  if (keyMap["ArrowUp"]) return 1;
-  if (keyMap["ArrowDown"]) return -1;
-  return 0;
+
+const throttle = {
+  max: 15,
+  min: 0,
+  step: 5,
 };
 
-export const getBankingValue = (keyMap: any) => {
-  if (keyMap["ArrowLeft"]) return -1;
-  if (keyMap["ArrowRight"]) return 1;
-  return 0;
+const strafe = {
+  horizontal: {
+    max: 10,
+    min: -10,
+    step: 5,
+  },
+  vertical: {
+    max: 10,
+    min: -10,
+    step: 5,
+  },
 };
 
-export const getYawingValue = (keyMap: any) => {
-  if (keyMap["KeyA"]) return -1;
-  if (keyMap["KeyD"]) return 1;
-  return 0;
-};
-
-export const getClimbingValue = (keyMap: any) => {
-  if (keyMap["KeyW"]) return 1;
-  if (keyMap["KeyS"]) return -1;
-  return 0;
-};
-
-const updateY = (current: number, state: number, delta: number) => {
-  const climbing = getClimbingValue(state);
-  let y = current;
-  if (climbing > 0) {
-    if (y < 15) {
-      y += 5 * delta;
-    }
-  }
-  if (climbing < 0) {
-    if (y > 0) {
-      y -= 5 * delta;
-    }
-  }
-  return y;
-};
-const updateX = (current: number, state: number, delta: number) => {
-  const banking = getBankingValue(state);
-
-  let x = current;
-  if (banking === 0) {
-    if (x < 0) x += 2.5 * delta;
-    if (x > 0) x -= 2.5 * delta;
+export const updateForce = (
+  current: [number, number, number],
+  state: any,
+  delta: number
+): Triplet => {
+  let v: Triplet = [...current];
+  // update X banking
+  if (!state[Controls.StrafeLeft] && !state[Controls.StrafeRight]) {
+    if (v[0] < 0) v[0] += (strafe.horizontal.step / 2) * delta;
+    if (v[0] > 0) v[0] -= (strafe.horizontal.step / 2) * delta;
   } else {
     // arrow left
-    if (banking < 0) {
-      if (x >= -10.0) x -= 5 * delta;
+    if (state[Controls.StrafeLeft]) {
+      if (v[0] >= strafe.horizontal.min) v[0] -= strafe.horizontal.step * delta;
     }
     // arrow right
-    if (banking > 0) {
-      if (x <= 10.0) x += 5 * delta;
+    if (state[Controls.StrafeRight]) {
+      if (v[0] <= strafe.horizontal.max) v[0] += strafe.horizontal.step * delta;
     }
   }
-  return x;
-};
-
-const updateZ = (current: number, state: number, delta: number) => {
-  const pitching = getPitchingValue(state);
-  let z = current;
-  if (pitching === 0) {
-    if (z < 0) z += 2.5 * delta;
-    if (z > 0) z -= 2.5 * delta;
-  } else {
-    if (pitching > 0) {
-      if (z >= -10.0) z -= 5 * delta;
-    }
-    if (pitching < 0) {
-      if (z <= 10.0) z += 5 * delta;
+  // update Y
+  if (state[Controls.ThrottleUp]) {
+    if (v[1] < throttle.max) {
+      v[1] += throttle.step * delta;
     }
   }
-  return z;
-};
-
-const getAngularVelocity = (current: number[], state: any, delta: number) => {
-  let v = [...current];
-  const yawing = getYawingValue(state);
-  if (yawing === 0) {
-    if (v[1] < 0) v[1] += delta;
-    if (v[1] > 0) v[1] -= delta;
-  } else {
-    if (yawing < 0) {
-      if (v[1] < 2.0) v[1] += 5 * delta;
+  if (state[Controls.ThrottleDown]) {
+    if (v[1] > 0) {
+      v[1] -= throttle.step * delta;
     }
-    if (yawing > 0) {
-      if (v[1] > -2.0 && v[1] < 2.0) v[1] -= 5 * delta;
+  }
+  // update z pitching
+
+  if (!state[Controls.StrafeForward] && !state[Controls.StrafeBackward]) {
+    if (v[2] < 0) v[2] += (strafe.vertical.step / 2) * delta;
+    if (v[2] > 0) v[2] -= (strafe.vertical.step / 2) * delta;
+  } else {
+    // arrow up
+    if (state[Controls.StrafeForward]) {
+      if (v[2] >= strafe.vertical.min) v[2] -= strafe.vertical.step * delta;
+    }
+    // arrow down
+    if (state[Controls.StrafeBackward]) {
+      if (v[2] <= strafe.vertical.max) v[2] += strafe.horizontal.step * delta;
     }
   }
   return v;
 };
 
-export const getUpdates = (current: RefState, state: any, delta: number) => {
-  const force = [...current.force]
-  return {
-    force: [
-      updateX(force[0], state, delta),
-      updateY(force[1], state, delta),
-      updateZ(force[2], state, delta),
-    ] as Triplet,
-    angularVelocity: getAngularVelocity(
-      current.angularVelocity,
-      state,
-      delta
-    ) as Triplet,
-  };
+
+export const getAngularVelocity = (current: number[], state: any, delta: number) => {
+  let v = [...current];
+  if (!state[Controls.TurnLeft] && !state[Controls.TurnRight]) {
+    if (v[1] < 0) v[1] += delta;
+    if (v[1] > 0) v[1] -= delta;
+  } else {
+    if (state[Controls.TurnLeft]) {
+      if (v[1] < 2.0) v[1] += 5 * delta;
+    }
+    if (state[Controls.TurnRight]) {
+      if (v[1] > -2.0 && v[1] < 2.0) v[1] -= 5 * delta;
+    }
+  }
+  return v;
 };
 
 export type RefState = {
