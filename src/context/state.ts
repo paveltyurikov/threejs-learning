@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { INITIAL_STATE } from "../constatnts/state";
+import { INITIAL_STATE } from "../constants/state";
 
 
 const StateContext = createContext({

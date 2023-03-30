@@ -2,18 +2,17 @@
 import { forwardRef, useRef } from "react";
 import { BufferGeometry, Material, Mesh } from "three";
 import { Position } from "three/examples/jsm/utils/ShadowMapViewer";
-import useKeyMap from "../../hooks/useKeyMap";
+
 import BodyWithGears from "./BodyWithGears";
-import { AVAILABLE_KEYS, useHeliRef } from "./lib";
+import { useHeliRef } from "./lib";
 import TopFan from "./TopFan";
 
 
 const BottleHelicopter = forwardRef<
   any,
-  { started?: boolean; speed?: number; position: Position }
+  { started?: boolean; speed?: number; position?: Position }
 >(({ started = false, speed = 0, position }, ref) => {
   const heliRef = useHeliRef();
-  const keyMap = useKeyMap(AVAILABLE_KEYS);
 
   const bodyRef = useRef<Mesh<BufferGeometry, Material | Material[]> | null>(
     null

@@ -1,13 +1,14 @@
 import React from "react";
-import CannonHelicopter from "./components/CannonHelicopter";
-import Layout from "./Layout/Layout";
+import { RouterProvider } from "react-router-dom";
+import AllProviders from "./providers/AllProviders";
+import defaultRouter from "./router";
 
 
 function App() {
   return (
-    <Layout>
-      <CannonHelicopter />
-    </Layout>
+    <AllProviders>
+      <RouterProvider router={defaultRouter} />
+    </AllProviders>
   );
 }
 

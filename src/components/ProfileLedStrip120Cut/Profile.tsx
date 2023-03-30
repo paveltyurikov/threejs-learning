@@ -1,7 +1,7 @@
 import {lighten} from "@mui/material";
 import { Center, Extrude } from "@react-three/drei";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader";
-import {COLORS} from "../../constatnts/colors";
+import {COLORS} from "../../constants/colors";
 
 
 const PROFILE_SVG = `

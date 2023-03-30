@@ -1,5 +1,5 @@
 import { ReactNode, useCallback, useState } from "react";
-import { INITIAL_STATE } from "../../constatnts/state";
+import { INITIAL_STATE } from "../../constants/state";
 import { StateContextProvider } from "../../context/state";
 
 
