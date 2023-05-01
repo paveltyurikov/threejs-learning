@@ -1,146 +1,103 @@
-import { useMemo } from "react";
 import { BoxProps, SphereArgs, Triplet } from "@react-three/cannon";
-import { KeyboardControlsEntry } from "@react-three/drei";
+import { DualShock4 } from "webhid-ds4";
 
 
-export const HELI_TAIL = {
-  position: [0, 0, 1],
-  geometry_args: [0.1, 0.1, 2] as BoxProps["args"],
-} as const;
-
-const SKID_GEOMETRY = [0.1, 0.05, 1.5] as BoxProps["args"];
-
-export const SKID_RIGHT = {
-  position: [0.5, -0.5, 0],
-  geometry_args: SKID_GEOMETRY,
-} as const;
-
-export const SKID_LEFT = {
-  position: [-0.5, -0.5, 0],
-  geometry_args: SKID_GEOMETRY,
-} as const;
-
-export const BODY = {
-  geometry_args: [0.66] as SphereArgs,
-} as const;
-
-export enum Controls {
-  StrafeForward = "StrafeForward",
-  StrafeBackward = "StrafeBackward",
-  StrafeLeft = "StrafeLeft",
-  StrafeRight = "StrafeRight",
-  TurnLeft = "TurnLeft",
-  ThrottleDown = "ThrottleDown",
-  TurnRight = "TurnRight",
-  ThrottleUp = "ThrottleUp",
-}
-
-export const useKeysMap = () =>
-  useMemo<KeyboardControlsEntry<Controls>[]>(
-    () => [
-      { name: Controls.StrafeForward, keys: ["ArrowUp"] },
-      { name: Controls.StrafeBackward, keys: ["ArrowDown"] },
-      { name: Controls.StrafeLeft, keys: ["ArrowLeft"] },
-      { name: Controls.StrafeRight, keys: ["ArrowRight"] },
-      { name: Controls.ThrottleUp, keys: ["KeyW"] },
-      { name: Controls.ThrottleDown, keys: ["KeyS"] },
-      { name: Controls.TurnLeft, keys: ["KeyA"] },
-      { name: Controls.TurnRight, keys: ["KeyD"] },
-    ],
-    []
-  );
-
-
-const throttle = {
-  max: 15,
-  min: 0,
-  step: 5,
-};
-
-const strafe = {
-  horizontal: {
-    max: 10,
-    min: -10,
-    step: 5,
+const ROTOR_Y = 0.8;
+export const SCENE = {
+  GRAVITY: [0, -9.8, 0] as any,
+  CAMERA: { fov: 50, position: [5, 5, 5] } as const,
+  CANNON: {
+    HELICOPTER: {
+      ref: {
+        force: [0, 5, 0],
+        angularVelocity: [0, 0, 0],
+      },
+      bodySphere: {
+        args: [0.66],
+        position: [0, 1.66, 0],
+        mass: 1.35,
+      },
+      rotorSphere: {
+        args: [0.1],
+        mass: 0.15,
+        position: [0, ROTOR_Y, 0],
+        rotation: [0, 0, 0],
+        linearDamping: 0.5,
+        angularDamping: 0.5,
+      },
+      PTPConstraintOptions: {
+        pivotA: [0, ROTOR_Y, 0],
+        pivotB: [0, 0, 0],
+      },
+    },
   },
-  vertical: {
-    max: 10,
-    min: -10,
-    step: 5,
+  HELICOPTER: {
+    body: {
+      geometry_args: [0.66] as SphereArgs,
+    },
+    tail: {
+      position: [0, 0, 1],
+      geometry_args: [0.1, 0.1, 2] as BoxProps["args"],
+    },
+    skid: {
+      right: {
+        position: [0.5, -0.5, 0],
+        geometry_args: [0.1, 0.05, 1.5] as BoxProps["args"],
+      },
+      left: {
+        position: [-0.5, -0.5, 0],
+        geometry_args: [0.1, 0.05, 1.5] as BoxProps["args"],
+      },
+    },
   },
-};
-
-export const updateForce = (
-  current: [number, number, number],
-  state: any,
-  delta: number
-): Triplet => {
-  let v: Triplet = [...current];
-  // update X banking
-  if (!state[Controls.StrafeLeft] && !state[Controls.StrafeRight]) {
-    if (v[0] < 0) v[0] += (strafe.horizontal.step / 2) * delta;
-    if (v[0] > 0) v[0] -= (strafe.horizontal.step / 2) * delta;
-  } else {
-    // arrow left
-    if (state[Controls.StrafeLeft]) {
-      if (v[0] >= strafe.horizontal.min) v[0] -= strafe.horizontal.step * delta;
-    }
-    // arrow right
-    if (state[Controls.StrafeRight]) {
-      if (v[0] <= strafe.horizontal.max) v[0] += strafe.horizontal.step * delta;
-    }
-  }
-  // update Y
-  if (state[Controls.ThrottleUp]) {
-    if (v[1] < throttle.max) {
-      v[1] += throttle.step * delta;
-    }
-  }
-  if (state[Controls.ThrottleDown]) {
-    if (v[1] > 0) {
-      v[1] -= throttle.step * delta;
-    }
-  }
-  // update z pitching
-
-  if (!state[Controls.StrafeForward] && !state[Controls.StrafeBackward]) {
-    if (v[2] < 0) v[2] += (strafe.vertical.step / 2) * delta;
-    if (v[2] > 0) v[2] -= (strafe.vertical.step / 2) * delta;
-  } else {
-    // arrow up
-    if (state[Controls.StrafeForward]) {
-      if (v[2] >= strafe.vertical.min) v[2] -= strafe.vertical.step * delta;
-    }
-    // arrow down
-    if (state[Controls.StrafeBackward]) {
-      if (v[2] <= strafe.vertical.max) v[2] += strafe.horizontal.step * delta;
-    }
-  }
-  return v;
-};
-
-
-export const getAngularVelocity = (current: number[], state: any, delta: number) => {
-  let v = [...current];
-  if (!state[Controls.TurnLeft] && !state[Controls.TurnRight]) {
-    if (v[1] < 0) v[1] += delta;
-    if (v[1] > 0) v[1] -= delta;
-  } else {
-    if (state[Controls.TurnLeft]) {
-      if (v[1] < 2.0) v[1] += 5 * delta;
-    }
-    if (state[Controls.TurnRight]) {
-      if (v[1] > -2.0 && v[1] < 2.0) v[1] -= 5 * delta;
-    }
-  }
-  return v;
-};
+} as const;
 
 export type RefState = {
   force: Triplet;
   angularVelocity: Triplet;
 };
-export const INITIAL_REF: RefState = {
-  force: [0, 5, 0],
-  angularVelocity: [0, 0, 0],
-};
+
+export class CannonHelicopter {
+  private dsState: DualShock4["state"];
+  private force: Triplet;
+  private delta: number;
+  private currentAngularVelocity: Triplet;
+
+  constructor(
+    dsState: DualShock4["state"],
+    delta: number,
+    currentAngularVelocity: Triplet
+  ) {
+    this.dsState = dsState;
+    this.force = this.getForceFromDS4();
+    this.delta = delta;
+    this.currentAngularVelocity = currentAngularVelocity;
+  }
+
+  getForceFromDS4 = (): Triplet => {
+    return [
+      2 * this.dsState.axes.rightStickX,
+      24 * this.dsState.axes.r2,
+      2 * this.dsState.axes.rightStickY,
+    ];
+  };
+  getAngularVelocityFromDS4 = () => {
+    let v = [...this.currentAngularVelocity];
+    if (this.dsState.buttons.l1 || this.dsState.buttons.r1) {
+      const sign = this.dsState.buttons.r1 ? -1 : 1;
+      if (v[1] > -2.0 && v[1] < 2.0) v[1] = v[1] + 5 * this.delta * sign;
+    } else {
+      v[1] = v[1] - this.delta * Math.sign(v[1]);
+    }
+    return v;
+  };
+  getRotorSpeed = () => {
+    return this.delta * (this.force[1] || 10) * 1.2;
+  };
+
+  getNextState = () => ({
+    force: this.getForceFromDS4(),
+    angularVelocity: this.getAngularVelocityFromDS4(),
+    rotorSpeed: this.getRotorSpeed(),
+  });
+}
