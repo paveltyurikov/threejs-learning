@@ -1,4 +1,4 @@
-import { Box, Container, Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import Link from "../Link";
 
