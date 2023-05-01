@@ -1,8 +1,3 @@
-// const groundGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(100, 100);
-//     const groundMesh: THREE.Mesh = new THREE.Mesh(groundGeometry, phongMaterial);
-//     groundMesh.rotateX(-Math.PI / 2);
-//     groundMesh.receiveShadow = true;
-//     return groundMesh;
 import { usePlane } from "@react-three/cannon";
 
 
