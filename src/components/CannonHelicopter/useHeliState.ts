@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import { usePointToPointConstraint, useSphere } from "@react-three/cannon";
 import { useFrame } from "@react-three/fiber";
+import { Object3D } from "three";
 import { useDualShock4HIDContext } from "./DualShock4Provider/context";
 import { CannonHelicopter, SCENE } from "./lib";
 
@@ -11,17 +12,37 @@ const useHeliState = () => {
 
   const refState = useRef(SCENE.CANNON.HELICOPTER.ref);
 
+  const pivotRef = useRef<typeof Object3D>(new Object3D());
+
   const rotorMeshRef = useRef();
 
-  const [bodyRef, { angularVelocity: bodyAngularVelocity }] = useSphere(
-    () => SCENE.CANNON.HELICOPTER.bodySphere
-  );
-  const [rotorRef, { applyLocalForce, angularVelocity: rotorAngularVelocity }] =
-    useSphere(() => SCENE.CANNON.HELICOPTER.rotorSphere);
+  const [
+    bodyRef,
+    { angularVelocity: bodyAngularVelocity, position: bodyPosition },
+  ] = useSphere(() => SCENE.CANNON.HELICOPTER.bodySphere);
+
+  const [
+    rotorRef,
+    {
+      applyLocalForce,
+      angularVelocity: rotorAngularVelocity,
+      quaternion: rotorQuaternion,
+    },
+  ] = useSphere(() => SCENE.CANNON.HELICOPTER.rotorSphere);
 
   useEffect(() => {
     return rotorAngularVelocity.subscribe((v) => bodyAngularVelocity.set(...v));
   }, [bodyAngularVelocity, rotorAngularVelocity]);
+
+  useEffect(() => {
+    return bodyPosition.subscribe((v) => pivotRef.current?.position.set(...v));
+  }, [bodyPosition]);
+
+  useEffect(() => {
+    return rotorQuaternion.subscribe((q) =>
+      pivotRef.current?.quaternion.set(...q)
+    );
+  }, [rotorQuaternion]);
 
   usePointToPointConstraint(
     bodyRef,
@@ -29,7 +50,8 @@ const useHeliState = () => {
     SCENE.CANNON.HELICOPTER.PTPConstraintOptions
   );
 
-  useFrame((_, delta) => {
+  useFrame(({ camera, ...rest }, delta) => {
+    //console.log({camera, ...rest})
     const canAnimate =
       bodyRef.current &&
       rotorRef.current &&
@@ -52,7 +74,16 @@ const useHeliState = () => {
       rotorMeshRef.current.rotateY(nextState.rotorSpeed);
 
       rotorAngularVelocity.set(...nextState.angularVelocity);
+      const cp = [...pivotRef.current.position];
 
+      cp[1] += 7;
+      cp[2] += 8;
+      // camera.quaternion.set(...pivotRef.current.quaternion);
+      camera.position.lerp({ x: cp[0], y: cp[1], z: cp[2] }, 0.05);
+
+      camera.lookAt(
+        bodyRef.current?.getWorldPosition(bodyRef.current?.position)
+      );
       applyLocalForce(nextState.force, [0, 0, 0]);
     }
   });

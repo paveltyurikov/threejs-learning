@@ -1,11 +1,11 @@
 import { Line, Text } from "@react-three/drei";
 import { MeshProps } from "@react-three/fiber";
-import {TEXT_Y_ROTATION} from "./lib";
+import { TEXT_Y_ROTATION } from "./lib";
 
 
 const Z = 0.1;
 
-const TG = 0.25
+const TG = 0.25;
 export const SizeY = ({
   size,
   color = "black",
@@ -78,7 +78,7 @@ export const SizeY = ({
 };
 
 export const SizeX = ({
-  size=8,
+  size = 8,
   color = "black",
   ...meshProps
 }: { size: number; color?: string } & MeshProps) => {
@@ -89,14 +89,14 @@ export const SizeX = ({
         color={color}
         anchorX="center"
         anchorY="middle"
-        rotation={[0, 0,0]}
+        rotation={[0, 0, 0]}
       >
         {size}mm
       </Text>
       <Line
         points={[
-          [-size / 2, 0 , Z],
-          [size / 2, 0 , Z],
+          [-size / 2, 0, Z],
+          [size / 2, 0, Z],
         ]}
         color={color} // Default
         lineWidth={1} // In pixels (default)

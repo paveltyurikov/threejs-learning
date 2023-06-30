@@ -19,11 +19,7 @@ const useDS4State = () => {
   const onClick = React.useCallback(async () => {
     const ds4 = new DualShock4();
     await ds4.init();
-    setState((currState) => {
-      const active = currState.filter((ds) => ds.device.open);
-      active.push(ds4);
-      return active;
-    });
+    setState([ds4]);
   }, []);
   return [controllers, onClick];
 };

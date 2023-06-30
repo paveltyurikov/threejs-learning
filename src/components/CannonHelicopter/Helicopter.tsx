@@ -1,8 +1,9 @@
 import React from "react";
-import { Edges } from "@react-three/drei";
+import { Edges, Text } from "@react-three/drei";
 import { Group, Mesh } from "three";
 import { isDevEnv } from "../../lib/isEnv";
 import ForceHelper from "../ForceHelper";
+import { TEXT_Y_ROTATION } from "../ProfileLedStrip120Cut/lib";
 import { SCENE } from "./lib";
 import useHeliState from "./useHeliState";
 
@@ -12,7 +13,27 @@ const Helicopter = () => {
 
   return (
     <>
+      <directionalLight
+        castShadow={true}
+        shadow-mapSize={[6384, 16384]}
+        shadow-camera-far={100}
+        shadow-camera-near={0.5}
+        shadow-camera-top={100}
+        shadow-camera-bottom={-100}
+        shadow-camera-left={100}
+        shadow-camera-right={100}
+      />
+
       <mesh ref={rotorRef as React.RefObject<Mesh>}>
+        <Text
+          position={[2, 2, 2]}
+          color="red"
+          anchorX="center"
+          anchorY="middle"
+          rotation={TEXT_Y_ROTATION}
+        >
+          {rotorRef.current?.position}mm
+        </Text>
         <mesh
           // @ts-ignore
           className="id-heli-rotor"

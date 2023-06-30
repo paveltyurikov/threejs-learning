@@ -47,5 +47,4 @@ const Led = (props: MeshProps) => {
   );
 };
 
-
 export default Led;

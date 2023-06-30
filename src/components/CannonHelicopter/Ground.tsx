@@ -16,11 +16,10 @@ const Ground = () => {
     // @ts-ignore
     <mesh ref={ref} receiveShadow={true}>
       <planeGeometry
-        attach="geometry"
         // @ts-ignore
         args={PLANE_GEOMETRY_ARGS}
       />
-      <meshPhongMaterial attach="material" color="#eeeeee" />
+      <meshPhongMaterial attach="material" color="#red" />
     </mesh>
   );
 };
