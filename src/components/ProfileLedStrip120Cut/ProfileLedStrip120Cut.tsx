@@ -7,7 +7,7 @@ const ProfileLedStrip120Cut = () => {
   return (
     <Scene>
       <Profile />
-      <LedStrip120Cut position={[0,0,1.2]} />
+      <LedStrip120Cut position={[0, 0, 1.2]} />
     </Scene>
   );
 };

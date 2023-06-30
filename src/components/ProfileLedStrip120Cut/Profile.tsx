@@ -1,7 +1,6 @@
-import {lighten} from "@mui/material";
+import { lighten } from "@mui/material";
 import { Center, Extrude } from "@react-three/drei";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader";
-import {COLORS} from "../../constants/colors";
 
 
 const PROFILE_SVG = `
@@ -43,12 +42,15 @@ const SHAPE = SHAPES[0].shape;
 //     return _shape;
 //   }, []);
 const Profile = (props: any) => {
-    console.log(SHAPE)
+  console.log(SHAPE);
   return (
     <Center position={[0, 0, 3.5]} rotation={[-Math.PI / 2, 0, 0]}>
-        <Extrude args={[SHAPE, extrudeSettings]} {...props}  >
-            <meshBasicMaterial attach="material" color={lighten("rgba(108, 122, 137)", .4)} />
-        </Extrude>
+      <Extrude args={[SHAPE, extrudeSettings]} {...props}>
+        <meshBasicMaterial
+          attach="material"
+          color={lighten("rgba(108, 122, 137)", 0.4)}
+        />
+      </Extrude>
     </Center>
   );
 };

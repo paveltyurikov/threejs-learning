@@ -1,4 +1,4 @@
 import ForceHelper from "./ForceHelper";
 
 
-export default ForceHelper
+export default ForceHelper;

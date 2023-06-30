@@ -1,6 +1,8 @@
 import React from "react";
 import { Debug, Physics } from "@react-three/cannon";
+import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
+import { isDevEnv } from "../../lib/isEnv";
 import BottleHelicopterMesh from "./BottleHelicopter";
 import DirectionalLight from "./DirectionalLight";
 
@@ -16,8 +18,9 @@ const BottleHelicopter = () => {
           <BottleHelicopterMesh />
         </Debug>
       </Physics>
+      {isDevEnv() ? <OrbitControls /> : null}
     </Canvas>
   );
 };
 
-export default BottleHelicopter
+export default BottleHelicopter;

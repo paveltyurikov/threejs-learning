@@ -1,4 +1,4 @@
-import { Typography, Container } from "@mui/material";
+import { Container, Typography } from "@mui/material";
 import { get } from "lodash";
 import { useRouteError } from "react-router-dom";
 import Link from "../Link";
